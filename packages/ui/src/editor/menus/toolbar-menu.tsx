@@ -1,7 +1,7 @@
 import { Editor, isNodeSelection, useEditorState } from '@tiptap/react';
 import { BubbleMenu, type BubbleMenuProps } from '@tiptap/react/menus';
 import { Bold, Code, Italic, Strikethrough, Underline } from 'lucide-react';
-import { memo, useCallback, useMemo, useState } from 'react';
+import { useState, useCallback, useMemo, memo } from 'react';
 
 import { ColorButton } from '@colanode/ui/editor/menus/color-button';
 import { HighlightButton } from '@colanode/ui/editor/menus/highlight-button';
