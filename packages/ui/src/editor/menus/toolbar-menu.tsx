@@ -1,18 +1,18 @@
 import { Editor, isNodeSelection, useEditorState } from '@tiptap/react';
 import { BubbleMenu, type BubbleMenuProps } from '@tiptap/react/menus';
 import { Bold, Code, Italic, Strikethrough, Underline } from 'lucide-react';
-import { useState } from 'react';
+import { useState, memo } from 'react';
 
-import { ColorButton } from '@colanode/ui/editor/menus/color-button';
-import { HighlightButton } from '@colanode/ui/editor/menus/highlight-button';
-import { LinkButton } from '@colanode/ui/editor/menus/link-button';
-import { MarkButton } from '@colanode/ui/editor/menus/mark-button';
+import { ColorButton } from '@brainbox/ui/editor/menus/color-button';
+import { HighlightButton } from '@brainbox/ui/editor/menus/highlight-button';
+import { LinkButton } from '@brainbox/ui/editor/menus/link-button';
+import { MarkButton } from '@brainbox/ui/editor/menus/mark-button';
 
 interface ToolbarMenuProps extends Omit<BubbleMenuProps, 'children'> {
   editor: Editor;
 }
 
-export const ToolbarMenu = (props: ToolbarMenuProps) => {
+const ToolbarMenuComponent = (props: ToolbarMenuProps) => {
   const [isColorButtonOpen, setIsColorButtonOpen] = useState(false);
   const [isLinkButtonOpen, setIsLinkButtonOpen] = useState(false);
   const [isHighlightButtonOpen, setIsHighlightButtonOpen] = useState(false);
@@ -80,7 +80,7 @@ export const ToolbarMenu = (props: ToolbarMenuProps) => {
   return (
     <BubbleMenu
       {...bubbleMenuProps}
-      className="flex flex-row items-center gap-1 rounded border border-border bg-muted p-0.5 shadow-xl transition-transform duration-150 ease-out"
+      className="flex flex-row items-center gap-0.5 rounded-xl border border-border/30 bg-background/98 backdrop-blur-lg p-1.5 shadow-2xl shadow-black/10 dark:shadow-black/30 transition-all duration-200 ease-out animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-1"
     >
       <LinkButton
         editor={props.editor}
@@ -137,3 +137,5 @@ export const ToolbarMenu = (props: ToolbarMenuProps) => {
     </BubbleMenu>
   );
 };
+
+export const ToolbarMenu = memo(ToolbarMenuComponent);
