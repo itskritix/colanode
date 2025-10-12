@@ -1,7 +1,7 @@
 import { Editor, isNodeSelection, useEditorState } from '@tiptap/react';
 import { BubbleMenu, type BubbleMenuProps } from '@tiptap/react/menus';
 import { Bold, Code, Italic, Strikethrough, Underline } from 'lucide-react';
-import { useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 
 import { ColorButton } from '@colanode/ui/editor/menus/color-button';
 import { HighlightButton } from '@colanode/ui/editor/menus/highlight-button';
@@ -12,7 +12,7 @@ interface ToolbarMenuProps extends Omit<BubbleMenuProps, 'children'> {
   editor: Editor;
 }
 
-export const ToolbarMenu = (props: ToolbarMenuProps) => {
+export const ToolbarMenu = memo((props: ToolbarMenuProps) => {
   const [isColorButtonOpen, setIsColorButtonOpen] = useState(false);
   const [isLinkButtonOpen, setIsLinkButtonOpen] = useState(false);
   const [isHighlightButtonOpen, setIsHighlightButtonOpen] = useState(false);
@@ -35,9 +35,8 @@ export const ToolbarMenu = (props: ToolbarMenuProps) => {
     },
   });
 
-  const bubbleMenuProps: ToolbarMenuProps = {
-    ...props,
-    shouldShow: ({ state, editor }) => {
+  const shouldShow = useCallback(
+    ({ state, editor }: { state: any; editor: Editor }) => {
       const { selection } = state;
       const { empty } = selection;
 
@@ -61,17 +60,75 @@ export const ToolbarMenu = (props: ToolbarMenuProps) => {
 
       return true;
     },
-    options: {
-      strategy: 'absolute',
-      placement: 'top',
-      offset: 8,
-      onHide: () => {
-        setIsColorButtonOpen(false);
-        setIsLinkButtonOpen(false);
-        setIsHighlightButtonOpen(false);
+    []
+  );
+
+  const onHide = useCallback(() => {
+    setIsColorButtonOpen(false);
+    setIsLinkButtonOpen(false);
+    setIsHighlightButtonOpen(false);
+  }, []);
+
+  const bubbleMenuProps: ToolbarMenuProps = useMemo(
+    () => ({
+      ...props,
+      shouldShow,
+      options: {
+        strategy: 'absolute' as const,
+        placement: 'top' as const,
+        offset: 8,
+        onHide,
       },
+    }),
+    [props, shouldShow, onHide]
+  );
+
+  const handleLinkButtonOpenChange = useCallback(
+    (isOpen: boolean) => {
+      setIsColorButtonOpen(false);
+      setIsHighlightButtonOpen(false);
+      setIsLinkButtonOpen(isOpen);
     },
-  };
+    []
+  );
+
+  const handleColorButtonOpenChange = useCallback(
+    (isOpen: boolean) => {
+      setIsColorButtonOpen(isOpen);
+      setIsLinkButtonOpen(false);
+      setIsHighlightButtonOpen(false);
+    },
+    []
+  );
+
+  const handleHighlightButtonOpenChange = useCallback(
+    (isOpen: boolean) => {
+      setIsHighlightButtonOpen(isOpen);
+      setIsColorButtonOpen(false);
+      setIsLinkButtonOpen(false);
+    },
+    []
+  );
+
+  const handleBoldClick = useCallback(() => {
+    props.editor?.chain().focus().toggleBold().run();
+  }, [props.editor]);
+
+  const handleItalicClick = useCallback(() => {
+    props.editor?.chain().focus().toggleItalic().run();
+  }, [props.editor]);
+
+  const handleUnderlineClick = useCallback(() => {
+    props.editor?.chain().focus().toggleUnderline().run();
+  }, [props.editor]);
+
+  const handleStrikeClick = useCallback(() => {
+    props.editor?.chain().focus().toggleStrike().run();
+  }, [props.editor]);
+
+  const handleCodeClick = useCallback(() => {
+    props.editor?.chain().focus().toggleCode().run();
+  }, [props.editor]);
 
   if (props.editor == null) {
     return null;
@@ -85,55 +142,45 @@ export const ToolbarMenu = (props: ToolbarMenuProps) => {
       <LinkButton
         editor={props.editor}
         isOpen={isLinkButtonOpen}
-        setIsOpen={(isOpen) => {
-          setIsColorButtonOpen(false);
-          setIsHighlightButtonOpen(false);
-          setIsLinkButtonOpen(isOpen);
-        }}
+        setIsOpen={handleLinkButtonOpenChange}
       />
       <MarkButton
         isActive={state?.isBoldActive ?? false}
-        onClick={() => props.editor?.chain().focus().toggleBold().run()}
+        onClick={handleBoldClick}
         icon={Bold}
       />
       <MarkButton
         isActive={state?.isItalicActive ?? false}
-        onClick={() => props.editor?.chain().focus().toggleItalic().run()}
+        onClick={handleItalicClick}
         icon={Italic}
       />
       <MarkButton
         isActive={state?.isUnderlineActive ?? false}
-        onClick={() => props.editor?.chain().focus().toggleUnderline().run()}
+        onClick={handleUnderlineClick}
         icon={Underline}
       />
       <MarkButton
         isActive={state?.isStrikeActive ?? false}
-        onClick={() => props.editor?.chain().focus().toggleStrike().run()}
+        onClick={handleStrikeClick}
         icon={Strikethrough}
       />
       <MarkButton
         isActive={state?.isCodeActive ?? false}
-        onClick={() => props.editor?.chain().focus().toggleCode().run()}
+        onClick={handleCodeClick}
         icon={Code}
       />
       <ColorButton
         editor={props.editor}
         isOpen={isColorButtonOpen}
-        setIsOpen={(isOpen) => {
-          setIsColorButtonOpen(isOpen);
-          setIsLinkButtonOpen(false);
-          setIsHighlightButtonOpen(false);
-        }}
+        setIsOpen={handleColorButtonOpenChange}
       />
       <HighlightButton
         editor={props.editor}
         isOpen={isHighlightButtonOpen}
-        setIsOpen={(isOpen) => {
-          setIsHighlightButtonOpen(isOpen);
-          setIsColorButtonOpen(false);
-          setIsLinkButtonOpen(false);
-        }}
+        setIsOpen={handleHighlightButtonOpenChange}
       />
     </BubbleMenu>
   );
-};
+});
+
+ToolbarMenu.displayName = 'ToolbarMenu';
